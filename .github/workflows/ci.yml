@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ "**" ]
+    branches: ["**"]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   test:
@@ -13,8 +13,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
         with:
-          java-version: '17'
-          distribution: 'temurin'
+          java-version: "17"
+          distribution: "temurin"
       - run: mvn -q test
       - uses: actions/upload-artifact@v4
         if: always()
@@ -29,8 +29,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
         with:
-          java-version: '17'
-          distribution: 'temurin'
+          java-version: "17"
+          distribution: "temurin"
       - run: mvn -q package -DskipTests
       - run: docker build -t tracker .
 
@@ -40,5 +40,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Trigger Render deploy
+        env:
+          RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
         run: |
-          curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK }}
+          if [ -z "$RENDER_DEPLOY_HOOK" ]; then
+            echo "ERROR: RENDER_DEPLOY_HOOK secret is not set."
+            echo "Go to GitHub repo → Settings → Secrets → Actions → New secret"
+            echo "Name: RENDER_DEPLOY_HOOK"
+            echo "Value: your Render deploy hook URL (Render dashboard → service → Settings → Deploy Hook)"
+            exit 1
+          fi
+          curl --fail -X POST "$RENDER_DEPLOY_HOOK"
