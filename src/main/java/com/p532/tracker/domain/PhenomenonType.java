@@ -1,5 +1,6 @@
 package com.p532.tracker.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +41,7 @@ public class PhenomenonType {
     public void setKind(MeasurementKind kind) { this.kind = kind; }
     public String getAllowedUnitsRaw() { return allowedUnitsRaw; }
     public void setAllowedUnitsRaw(String allowedUnitsRaw) { this.allowedUnitsRaw = allowedUnitsRaw; }
+    @JsonIgnore
     public List<Phenomenon> getPhenomena() { return phenomena; }
 
     public List<String> getAllowedUnits() {
