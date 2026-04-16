@@ -1,33 +1,37 @@
 package com.p532.tracker.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import java.time.LocalDate;
+
 @Entity
-@Table(name = "phenomena")
-public class Phenomenon {
+@Table(name = "patients")
+public class Patient {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    private String name;
+    private String fullName;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "phenomenon_type_id", nullable = false)
-    private PhenomenonType phenomenonType;
+    private LocalDate dateOfBirth;
 
-    public Phenomenon() {}
+    @Column(columnDefinition = "TEXT")
+    private String note;
 
-    public Phenomenon(String name, PhenomenonType phenomenonType) {
-        this.name = name;
-        this.phenomenonType = phenomenonType;
+    public Patient() {}
+
+    public Patient(String fullName, LocalDate dateOfBirth, String note) {
+        this.fullName = fullName;
+        this.dateOfBirth = dateOfBirth;
+        this.note = note;
     }
 
     public Long getId() { return id; }
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-    @JsonIgnore
-    public PhenomenonType getPhenomenonType() { return phenomenonType; }
-    public void setPhenomenonType(PhenomenonType phenomenonType) { this.phenomenonType = phenomenonType; }
+    public String getFullName() { return fullName; }
+    public void setFullName(String fullName) { this.fullName = fullName; }
+    public LocalDate getDateOfBirth() { return dateOfBirth; }
+    public void setDateOfBirth(LocalDate dateOfBirth) { this.dateOfBirth = dateOfBirth; }
+    public String getNote() { return note; }
+    public void setNote(String note) { this.note = note; }
 }
