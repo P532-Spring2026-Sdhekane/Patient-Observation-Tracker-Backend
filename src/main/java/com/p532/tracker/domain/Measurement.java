@@ -3,9 +3,7 @@ package com.p532.tracker.domain;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 
-/**
- * Operational-level entity: a quantitative measurement linked to a PhenomenonType.
- */
+
 @Entity
 @Table(name = "measurements")
 @PrimaryKeyJoinColumn(name = "observation_id")

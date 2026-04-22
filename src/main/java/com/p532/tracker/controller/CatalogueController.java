@@ -8,13 +8,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
-/**
- * CLIENT LAYER — CatalogueController (Week 2 updated)
- *
- * Change 1: POST /api/rules accepts strategyType, weightsJson, threshold
- * Change 2: POST /api/phenomenon-types accepts normalMin, normalMax
- * Change 4: POST /api/phenomenon-types/{id}/phenomena accepts parentConceptId
- */
 @RestController
 @RequestMapping("/api")
 public class CatalogueController {
@@ -25,7 +18,7 @@ public class CatalogueController {
         this.catalogueManager = catalogueManager;
     }
 
-    // ── Phenomenon Types ──────────────────────────────────────────────────────
+    // --- Phenomenon Types ---
 
     @GetMapping("/phenomenon-types")
     public List<PhenomenonType> listPhenomenonTypes() {
@@ -33,38 +26,24 @@ public class CatalogueController {
     }
 
     @PostMapping("/phenomenon-types")
-    public ResponseEntity<?> createPhenomenonType(@RequestBody Map<String, Object> body) {
+    public ResponseEntity<?> createPhenomenonType(@RequestBody Map<String, String> body) {
         try {
-            String name         = (String) body.get("name");
-            MeasurementKind kind = MeasurementKind.valueOf(
-                    ((String) body.get("kind")).toUpperCase());
-            String allowedUnits = (String) body.getOrDefault("allowedUnits", "");
-
-            // Week 2: optional normal range
-            Double normalMin = body.get("normalMin") != null
-                    ? Double.parseDouble(body.get("normalMin").toString()) : null;
-            Double normalMax = body.get("normalMax") != null
-                    ? Double.parseDouble(body.get("normalMax").toString()) : null;
-
-            PhenomenonType pt = catalogueManager.createPhenomenonType(
-                    name, kind, allowedUnits, normalMin, normalMax);
+            String name = body.get("name");
+            MeasurementKind kind = MeasurementKind.valueOf(body.get("kind").toUpperCase());
+            String allowedUnits = body.getOrDefault("allowedUnits", "");
+            PhenomenonType pt = catalogueManager.createPhenomenonType(name, kind, allowedUnits);
             return ResponseEntity.ok(pt);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 
-    // ── Phenomena ─────────────────────────────────────────────────────────────
-
     @PostMapping("/phenomenon-types/{id}/phenomena")
     public ResponseEntity<?> createPhenomenon(@PathVariable Long id,
-                                               @RequestBody Map<String, Object> body) {
+                                               @RequestBody Map<String, String> body) {
         try {
-            String name = (String) body.get("name");
-            // Week 2: optional parentConceptId
-            Long parentConceptId = body.get("parentConceptId") != null
-                    ? Long.parseLong(body.get("parentConceptId").toString()) : null;
-            Phenomenon ph = catalogueManager.createPhenomenon(id, name, parentConceptId);
+            String name = body.get("name");
+            Phenomenon ph = catalogueManager.createPhenomenon(id, name);
             return ResponseEntity.ok(ph);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
@@ -80,7 +59,7 @@ public class CatalogueController {
         }
     }
 
-    // ── Protocols ─────────────────────────────────────────────────────────────
+    // --- Protocols ---
 
     @GetMapping("/protocols")
     public List<Protocol> listProtocols() {
@@ -90,18 +69,17 @@ public class CatalogueController {
     @PostMapping("/protocols")
     public ResponseEntity<?> createProtocol(@RequestBody Map<String, String> body) {
         try {
-            String name          = body.get("name");
-            String description   = body.get("description");
-            AccuracyRating rating = AccuracyRating.valueOf(
-                    body.get("accuracyRating").toUpperCase());
-            return ResponseEntity.ok(
-                    catalogueManager.createProtocol(name, description, rating));
+            String name = body.get("name");
+            String description = body.get("description");
+            AccuracyRating rating = AccuracyRating.valueOf(body.get("accuracyRating").toUpperCase());
+            Protocol protocol = catalogueManager.createProtocol(name, description, rating);
+            return ResponseEntity.ok(protocol);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 
-    // ── Diagnostic Rules ──────────────────────────────────────────────────────
+    // --- Diagnostic Rules ---
 
     @GetMapping("/rules")
     public List<AssociativeFunction> listRules() {
@@ -109,23 +87,12 @@ public class CatalogueController {
     }
 
     @PostMapping("/rules")
-    public ResponseEntity<?> createRule(@RequestBody Map<String, Object> body) {
+    public ResponseEntity<?> createRule(@RequestBody Map<String, String> body) {
         try {
-            String name               = (String) body.get("name");
-            String argumentConceptIds = (String) body.get("argumentConceptIds");
-            String productConcept     = (String) body.get("productConcept");
-
-            // Week 2: strategy fields (all optional — default CONJUNCTIVE)
-            StrategyType strategyType = body.get("strategyType") != null
-                    ? StrategyType.valueOf(body.get("strategyType").toString().toUpperCase())
-                    : StrategyType.CONJUNCTIVE;
-            String weightsJson = (String) body.get("weightsJson");
-            Double threshold   = body.get("threshold") != null
-                    ? Double.parseDouble(body.get("threshold").toString()) : null;
-
-            AssociativeFunction rule = catalogueManager.createRule(
-                    name, argumentConceptIds, productConcept,
-                    strategyType, weightsJson, threshold);
+            String name = body.get("name");
+            String argumentConceptIds = body.get("argumentConceptIds");
+            String productConcept = body.get("productConcept");
+            AssociativeFunction rule = catalogueManager.createRule(name, argumentConceptIds, productConcept);
             return ResponseEntity.ok(rule);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));

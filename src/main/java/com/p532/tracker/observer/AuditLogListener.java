@@ -9,13 +9,6 @@ import org.springframework.stereotype.Component;
 import java.time.Clock;
 import java.time.Instant;
 
-/**
- * OBSERVER PATTERN — AuditLogListener (Listener 1)
- *
- * Listens for ObservationEvents and appends a durable audit log entry
- * to the database. This listener is decoupled from the publisher and
- * from RuleEvaluationListener.
- */
 @Component
 public class AuditLogListener {
 

@@ -9,11 +9,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
-/**
- * CLIENT LAYER — PatientController
- *
- * HTTP-only. Zero business logic. Delegates entirely to PatientManager.
- */
+
 @RestController
 @RequestMapping("/api/patients")
 public class PatientController {

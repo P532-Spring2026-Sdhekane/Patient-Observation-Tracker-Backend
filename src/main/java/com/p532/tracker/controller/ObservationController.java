@@ -1,7 +1,6 @@
 package com.p532.tracker.controller;
 
 import com.p532.tracker.domain.*;
-import com.p532.tracker.engine.DiagnosisEngine;
 import com.p532.tracker.manager.ObservationManager;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,12 +10,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
-/**
- * CLIENT LAYER — ObservationController (Week 2 updated)
- *
- * Change 1: /evaluate now returns List<RuleResult> with strategyUsed + evidenceIds
- * Change 3: reads X-Acting-User header to pass real username to manager
- */
+
 @RestController
 public class ObservationController {
 
@@ -32,23 +26,19 @@ public class ObservationController {
     }
 
     @PostMapping("/api/observations/measurement")
-    public ResponseEntity<?> recordMeasurement(
-            @RequestBody Map<String, Object> body,
-            @RequestHeader(value = "X-Acting-User", defaultValue = "staff") String actingUser) {
+    public ResponseEntity<?> recordMeasurement(@RequestBody Map<String, Object> body) {
         try {
-            Long patientId        = toLong(body.get("patientId"));
+            Long patientId = toLong(body.get("patientId"));
             Long phenomenonTypeId = toLong(body.get("phenomenonTypeId"));
-            BigDecimal amount     = new BigDecimal(body.get("amount").toString());
-            String unit           = (String) body.get("unit");
-            String appStr         = (String) body.get("applicabilityTime");
-            Instant applicability = appStr != null && !appStr.isBlank()
-                    ? Instant.parse(appStr) : null;
-            Long protocolId       = body.get("protocolId") != null
-                    ? toLong(body.get("protocolId")) : null;
+            BigDecimal amount = new BigDecimal(body.get("amount").toString());
+            String unit = (String) body.get("unit");
+            String applicabilityStr = (String) body.get("applicabilityTime");
+            Instant applicabilityTime = (applicabilityStr != null && !applicabilityStr.isBlank())
+                    ? Instant.parse(applicabilityStr) : null;
+            Long protocolId = body.get("protocolId") != null ? toLong(body.get("protocolId")) : null;
 
             Measurement saved = observationManager.recordMeasurement(
-                    patientId, phenomenonTypeId, amount, unit,
-                    applicability, protocolId, actingUser);
+                    patientId, phenomenonTypeId, amount, unit, applicabilityTime, protocolId);
             return ResponseEntity.ok(saved);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
@@ -58,22 +48,18 @@ public class ObservationController {
     }
 
     @PostMapping("/api/observations/category")
-    public ResponseEntity<?> recordCategoryObservation(
-            @RequestBody Map<String, Object> body,
-            @RequestHeader(value = "X-Acting-User", defaultValue = "staff") String actingUser) {
+    public ResponseEntity<?> recordCategoryObservation(@RequestBody Map<String, Object> body) {
         try {
-            Long patientId    = toLong(body.get("patientId"));
+            Long patientId = toLong(body.get("patientId"));
             Long phenomenonId = toLong(body.get("phenomenonId"));
-            Presence presence = Presence.valueOf(
-                    ((String) body.get("presence")).toUpperCase());
-            String appStr     = (String) body.get("applicabilityTime");
-            Instant applicability = appStr != null && !appStr.isBlank()
-                    ? Instant.parse(appStr) : null;
-            Long protocolId   = body.get("protocolId") != null
-                    ? toLong(body.get("protocolId")) : null;
+            Presence presence = Presence.valueOf(((String) body.get("presence")).toUpperCase());
+            String applicabilityStr = (String) body.get("applicabilityTime");
+            Instant applicabilityTime = (applicabilityStr != null && !applicabilityStr.isBlank())
+                    ? Instant.parse(applicabilityStr) : null;
+            Long protocolId = body.get("protocolId") != null ? toLong(body.get("protocolId")) : null;
 
             CategoryObservation saved = observationManager.recordCategoryObservation(
-                    patientId, phenomenonId, presence, applicability, protocolId, actingUser);
+                    patientId, phenomenonId, presence, applicabilityTime, protocolId);
             return ResponseEntity.ok(saved);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
@@ -86,7 +72,7 @@ public class ObservationController {
     public ResponseEntity<?> rejectObservation(@PathVariable Long id,
                                                 @RequestBody Map<String, String> body) {
         try {
-            String reason       = body.getOrDefault("reason", "");
+            String reason = body.getOrDefault("reason", "");
             Observation rejected = observationManager.rejectObservation(id, reason);
             return ResponseEntity.ok(rejected);
         } catch (IllegalArgumentException | IllegalStateException e) {
@@ -94,15 +80,11 @@ public class ObservationController {
         }
     }
 
-    /**
-     * Change 1: returns richer structure per fired rule:
-     *   { inferredConcept, strategyUsed, evidenceObservationIds }
-     */
     @PostMapping("/api/patients/{id}/evaluate")
     public ResponseEntity<?> evaluateRules(@PathVariable Long id) {
         try {
-            List<DiagnosisEngine.RuleResult> results = observationManager.evaluateRules(id);
-            return ResponseEntity.ok(Map.of("inferredConcepts", results));
+            List<String> inferences = observationManager.evaluateRules(id);
+            return ResponseEntity.ok(Map.of("inferredConcepts", inferences));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }

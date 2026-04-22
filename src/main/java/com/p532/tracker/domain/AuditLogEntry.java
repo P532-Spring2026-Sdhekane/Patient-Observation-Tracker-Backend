@@ -3,9 +3,7 @@ package com.p532.tracker.domain;
 import jakarta.persistence.*;
 import java.time.Instant;
 
-/**
- * Persistent audit log entry written by AuditLogListener on every observation lifecycle event.
- */
+
 @Entity
 @Table(name = "audit_log_entries")
 public class AuditLogEntry {
