@@ -3,6 +3,9 @@ package com.p532.tracker.domain;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 
+/**
+ * Operational-level entity representing a patient in the system.
+ */
 @Entity
 @Table(name = "patients")
 public class Patient {

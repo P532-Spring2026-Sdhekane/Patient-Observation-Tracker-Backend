@@ -3,6 +3,13 @@ package com.p532.tracker.domain;
 import jakarta.persistence.*;
 import java.time.Instant;
 
+/**
+ * Abstract base for all observations (operational level).
+ *
+ * Week 2 additions:
+ *  - source: MANUAL (staff-entered) or INFERRED (propagation listener)
+ *  - anomalyFlag: set by AnomalyFlaggingDecorator if value is outside normal range
+ */
 @Entity
 @Table(name = "observations")
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -36,6 +43,15 @@ public abstract class Observation {
     @Column
     private Long rejectedByObservationId;
 
+    // ── Week 2 additions ──────────────────────────────────────────────────────
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ObservationSource source = ObservationSource.MANUAL;
+
+    @Column(nullable = false)
+    private boolean anomalyFlag = false;
+
     public Observation() {}
 
     public Long getId() { return id; }
@@ -59,8 +75,13 @@ public abstract class Observation {
     public void setRejectionReason(String rejectionReason) { this.rejectionReason = rejectionReason; }
 
     public Long getRejectedByObservationId() { return rejectedByObservationId; }
-    public void setRejectedByObservationId(Long rejectedByObservationId) { this.rejectedByObservationId = rejectedByObservationId; }
+    public void setRejectedByObservationId(Long id) { this.rejectedByObservationId = id; }
 
+    public ObservationSource getSource() { return source; }
+    public void setSource(ObservationSource source) { this.source = source; }
+
+    public boolean isAnomalyFlag() { return anomalyFlag; }
+    public void setAnomalyFlag(boolean anomalyFlag) { this.anomalyFlag = anomalyFlag; }
 
     public abstract String getObservationType();
 }

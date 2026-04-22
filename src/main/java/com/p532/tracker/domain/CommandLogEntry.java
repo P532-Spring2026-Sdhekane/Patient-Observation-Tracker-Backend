@@ -3,7 +3,13 @@ package com.p532.tracker.domain;
 import jakarta.persistence.*;
 import java.time.Instant;
 
-
+/**
+ * Persistent record of every executed Command.
+ *
+ * Week 2 additions (Change 3):
+ *  - userId: the user who executed the command (replaces hardcoded "staff")
+ *  - undone: true once the command has been undone (prevents double-undo)
+ */
 @Entity
 @Table(name = "command_log_entries")
 public class CommandLogEntry {
@@ -24,18 +30,26 @@ public class CommandLogEntry {
     @Column(nullable = false)
     private String user;
 
+    // ── Week 2 additions ──────────────────────────────────────────────────────
+    @Column(nullable = false)
+    private boolean undone = false;
+
     public CommandLogEntry() {}
 
     public CommandLogEntry(String commandType, String payload, Instant executedAt, String user) {
         this.commandType = commandType;
-        this.payload = payload;
-        this.executedAt = executedAt;
-        this.user = user;
+        this.payload     = payload;
+        this.executedAt  = executedAt;
+        this.user        = user;
     }
 
-    public Long getId() { return id; }
+    public Long getId()            { return id; }
     public String getCommandType() { return commandType; }
-    public String getPayload() { return payload; }
+    public String getPayload()     { return payload; }
     public Instant getExecutedAt() { return executedAt; }
-    public String getUser() { return user; }
+    public String getUser()        { return user; }
+    public void setUser(String u)  { this.user = u; }
+
+    public boolean isUndone()      { return undone; }
+    public void setUndone(boolean u) { this.undone = u; }
 }
