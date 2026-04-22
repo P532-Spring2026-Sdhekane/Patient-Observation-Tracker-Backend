@@ -2,6 +2,9 @@ package com.p532.tracker.domain;
 
 import jakarta.persistence.*;
 
+/**
+ * Operational-level entity: a qualitative observation linked to a Phenomenon (knowledge level).
+ */
 @Entity
 @Table(name = "category_observations")
 @PrimaryKeyJoinColumn(name = "observation_id")
