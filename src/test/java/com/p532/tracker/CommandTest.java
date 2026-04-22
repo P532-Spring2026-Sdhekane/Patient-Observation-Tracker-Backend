@@ -89,7 +89,19 @@ class CommandTest {
         // Arrange
         Patient expected = new Patient("Dave", null, null);
         when(patientRepo.save(any())).thenReturn(expected);
-        when(commandLogRepo.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        // CommandLog caches the command by the saved entry's id — must return
+        // an entry with a non-null id to avoid NullPointerException in ConcurrentHashMap
+        when(commandLogRepo.save(any())).thenAnswer(inv -> {
+            CommandLogEntry entry = inv.getArgument(0);
+            // Reflectively set id=1 via a subclass stub
+            return new CommandLogEntry(
+                    entry.getCommandType(), entry.getPayload(),
+                    entry.getExecutedAt(), entry.getUser()) {
+                @Override public Long getId() { return 1L; }
+            };
+        });
+
         CreatePatientCommand cmd = new CreatePatientCommand(
                 patientRepo, objectMapper, "Dave", null, null);
 
