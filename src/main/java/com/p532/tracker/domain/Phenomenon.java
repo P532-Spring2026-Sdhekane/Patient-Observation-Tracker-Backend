@@ -1,8 +1,11 @@
 package com.p532.tracker.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
+/**
+ * Knowledge-level entity: a specific qualitative value belonging to a PhenomenonType.
+ * E.g. "Blood Group A" belongs to "Blood Group" PhenomenonType.
+ */
 @Entity
 @Table(name = "phenomena")
 public class Phenomenon {
@@ -28,8 +31,6 @@ public class Phenomenon {
     public Long getId() { return id; }
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
-
-    @JsonIgnore
     public PhenomenonType getPhenomenonType() { return phenomenonType; }
     public void setPhenomenonType(PhenomenonType phenomenonType) { this.phenomenonType = phenomenonType; }
 }
