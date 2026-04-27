@@ -6,12 +6,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-/**
- * MANAGER LAYER — CatalogueManager (Week 2 updated)
- *
- * Change 1: createRule() now accepts strategyType, weightsJson, threshold
- * Change 4: createPhenomenon() now accepts optional parentConceptId
- */
+
 @Service
 public class CatalogueManager {
 
@@ -36,8 +31,6 @@ public class CatalogueManager {
         this.auditLogRepo       = auditLogRepo;
     }
 
-    // ── PhenomenonType ────────────────────────────────────────────────────────
-
     public List<PhenomenonType> getAllPhenomenonTypes() {
         return phenomenonTypeRepo.findAll();
     }
@@ -51,7 +44,6 @@ public class CatalogueManager {
         return phenomenonTypeRepo.save(pt);
     }
 
-    /** Week 1 compat — no normal range */
     public PhenomenonType createPhenomenonType(String name, MeasurementKind kind,
                                                 String allowedUnitsRaw) {
         return createPhenomenonType(name, kind, allowedUnitsRaw, null, null);
@@ -62,11 +54,6 @@ public class CatalogueManager {
                 .orElseThrow(() -> new IllegalArgumentException("PhenomenonType not found: " + id));
     }
 
-    // ── Phenomenon ────────────────────────────────────────────────────────────
-
-    /**
-     * Change 4: accepts optional parentConceptId for concept hierarchy.
-     */
     public Phenomenon createPhenomenon(Long phenomenonTypeId, String name,
                                         Long parentConceptId) {
         PhenomenonType pt = phenomenonTypeRepo.findById(phenomenonTypeId)
@@ -86,16 +73,14 @@ public class CatalogueManager {
         return phenomenonRepo.save(phenomenon);
     }
 
-    /** Week 1 compat — no parent */
     public Phenomenon createPhenomenon(Long phenomenonTypeId, String name) {
         return createPhenomenon(phenomenonTypeId, name, null);
     }
 
     public List<Phenomenon> getPhenomenaForType(Long phenomenonTypeId) {
-        return phenomenonRepo.findByPhenomenonTypeId(phenomenonTypeId);
+        return phenomenonRepo.findByPhenomenonType_Id(phenomenonTypeId);
     }
 
-    // ── Protocol ──────────────────────────────────────────────────────────────
 
     public List<Protocol> getAllProtocols() {
         return protocolRepo.findAll();
@@ -106,15 +91,11 @@ public class CatalogueManager {
         return protocolRepo.save(new Protocol(name, description, accuracyRating));
     }
 
-    // ── AssociativeFunction (Diagnostic Rules) ────────────────────────────────
 
     public List<AssociativeFunction> getAllRules() {
         return ruleRepo.findAll();
     }
 
-    /**
-     * Change 1: accepts strategyType, weightsJson, threshold.
-     */
     public AssociativeFunction createRule(String name,
                                            String argumentConceptIds,
                                            String productConcept,
@@ -130,15 +111,12 @@ public class CatalogueManager {
         rule.setThreshold(threshold != null ? threshold : 0.5);
         return ruleRepo.save(rule);
     }
-
-    /** Week 1 compat — defaults to CONJUNCTIVE strategy */
     public AssociativeFunction createRule(String name, String argumentConceptIds,
                                            String productConcept) {
         return createRule(name, argumentConceptIds, productConcept,
                 StrategyType.CONJUNCTIVE, null, null);
     }
 
-    // ── Logs ──────────────────────────────────────────────────────────────────
 
     public List<CommandLogEntry> getCommandLog() {
         return commandLogRepo.findAllByOrderByExecutedAtDesc();
